@@ -166,16 +166,33 @@
 
 <script>
     let hp = 100;
-    // أصوات جاهزة من روابط مباشرة (أصوات ضربات حقيقية)
-    const punchSound = new Audio('https://www.soundjay.com/human/sounds/punch-guy-fist-1.mp3');
-    const slapSound = new Audio('https://www.soundjay.com/human/sounds/slap-1.mp3');
+    
+    // وظيفة توليد الصوت برمجياً (بتشتغل أوفلاين)
+    function playHitSound() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        } catch(e) { console.log("الصوت محظور حالياً"); }
+    }
 
     function hit(damage, emoji) {
         if (hp <= 0) return;
 
-        // تشغيل صوت عشوائي
-        if (emoji === '🖐️') slapSound.play();
-        else { punchSound.currentTime = 0; punchSound.play(); }
+        playHitSound();
 
         hp -= damage;
         if (hp < 0) hp = 0;
@@ -184,7 +201,6 @@
         bar.style.width = hp + '%';
         bar.innerText = 'طاقة الضحية: ' + hp + '%';
 
-        // تأثير الضربة
         const area = document.getElementById('victimArea');
         const effect = document.createElement('div');
         effect.className = 'hit-effect';
@@ -194,7 +210,6 @@
         area.appendChild(effect);
         setTimeout(() => effect.remove(), 400);
 
-        // اهتزاز
         document.getElementById('mainBody').classList.add('shake');
         document.getElementById('victimImg').style.transform = 'scale(0.9) rotate(5deg)';
         setTimeout(() => {
