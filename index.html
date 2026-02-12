@@ -17,8 +17,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow-y: auto; /* عشان لو الأزرار كتير يسكرول */
             color: #fff;
+            padding: 20px 0;
         }
 
         @keyframes gradient {
@@ -28,40 +29,28 @@
         }
 
         .game-card {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(20px);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 40px;
             padding: 30px;
             width: 90%;
-            max-width: 450px;
+            max-width: 500px;
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        h1 { 
-            font-size: 1.8rem; 
-            margin: 0 0 10px 0; 
-            color: #fff; 
-            text-shadow: 2px 2px 10px rgba(0, 0, 0, 1); 
-        }
-
-        p {
-            font-size: 1rem;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 1);
-            margin-bottom: 20px;
-            color: #ffd1d1;
-        }
+        h1 { font-size: 1.8rem; margin-bottom: 5px; text-shadow: 2px 2px 10px #000; }
+        p { color: #ffd1d1; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; }
 
         .victim-container {
             position: relative;
-            width: 220px;
-            height: 220px;
-            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px auto;
             border-radius: 50%;
-            border: 5px solid #ff758c;
+            border: 4px solid #ff758c;
             overflow: hidden;
-            cursor: crosshair;
             background: #fff;
         }
 
@@ -69,85 +58,81 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: 0.1s;
-        }
-
-        .hit-effect {
-            position: absolute;
-            font-size: 60px;
-            pointer-events: none;
-            z-index: 100;
-            animation: hitAnim 0.4s ease-out forwards;
-        }
-
-        @keyframes hitAnim {
-            0% { transform: scale(0.5); opacity: 1; }
-            100% { transform: scale(2) translateY(-50px); opacity: 0; }
+            transition: 0.3s filter, 0.1s transform;
         }
 
         .health-container {
             width: 100%;
-            height: 25px;
+            height: 20px;
             background: #333;
-            border-radius: 20px;
-            margin-bottom: 25px;
-            border: 1px solid #555;
+            border-radius: 10px;
+            margin-bottom: 20px;
             overflow: hidden;
+            border: 1px solid #555;
         }
 
         #healthBar {
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, #ff4e50, #f9d423);
-            transition: 0.2s;
+            transition: 0.3s;
+            font-size: 0.75rem;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            color: #fff;
         }
 
         .controls {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
         .btn-hit {
-            padding: 15px;
+            padding: 12px;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
             background: #ff758c;
             color: #fff;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .btn-hit:active { transform: scale(0.9); }
+        .btn-hit:hover { background: #ff4e50; }
 
-        .footer { margin-top: 25px; font-size: 0.8rem; color: #ccc; }
+        /* ستايل خاص لزر الزبالة والتفه */
+        .btn-alt { background: #6c757d; }
+        .btn-alt:hover { background: #495057; }
 
-        .shake { animation: shake 0.2s; }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-3px, 0px) rotate(-1deg); }
-            40% { transform: translate(3px, 2px) rotate(1deg); }
-            60% { transform: translate(-1px, -1px) rotate(0deg); }
-            80% { transform: translate(-3px, 1px) rotate(-1deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        .hit-effect {
+            position: absolute;
+            font-size: 50px;
+            pointer-events: none;
+            z-index: 100;
+            animation: hitAnim 0.5s ease-out forwards;
         }
+
+        @keyframes hitAnim {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.8) translateY(-40px); opacity: 0; }
+        }
+
+        .footer { margin-top: 20px; font-size: 0.8rem; opacity: 0.6; }
     </style>
 </head>
-<body id="mainBody">
+<body>
 
 <div class="game-card">
     <h1>اضربيه وهدي أعصابك يا حلوة ✨</h1>
-    <p>طلعي كل الزعل وفشي غلك فيه! 😈</p>
+    <p>فشي غلك بكل الأدوات المتاحة 😈</p>
 
     <div class="health-container">
-        <div id="healthBar">طاقة الضحية: 100%</div>
+        <div id="healthBar">قوة الضحية: 100%</div>
     </div>
 
     <div class="victim-container" id="victimArea">
@@ -155,79 +140,44 @@
     </div>
 
     <div class="controls">
-        <button class="btn-hit" onclick="hit(10, '🥊')">بوكس 🥊</button>
-        <button class="btn-hit" onclick="hit(15, '🖐️')">كف 👋</button>
-        <button class="btn-hit" onclick="hit(20, '🦵')">ركلة 🦵</button>
-        <button class="btn-hit" onclick="hit(25, '👞')">جزمه 👞</button>
+        <button class="btn-hit" onclick="hit(6, '🥊')">بوكس 🥊</button>
+        <button class="btn-hit" onclick="hit(7, '🖐️')">كف 👋</button>
+        <button class="btn-hit" onclick="hit(8, '🦵')">ركلة 🦵</button>
+        <button class="btn-hit" onclick="hit(5, '👞')">جزمه 👞</button>
+        <button class="btn-hit btn-alt" onclick="hit(10, '🔪')">سكين 🔪</button>
+        <button class="btn-hit btn-alt" onclick="hit(9, '🦯')">عصا 🦯</button>
+        <button class="btn-hit btn-alt" onclick="hit(4, '💦')">تفه 💦</button>
+        <button class="btn-hit btn-alt" onclick="hit(12, '🗑️')">زبالة 🗑️</button>
     </div>
 
-    <div class="footer">صُنع بكل حب لمحاربة النكد © 2026</div>
+    <div class="footer">AL-MOSIBA GAMES © 2026</div>
 </div>
 
 <script>
     let hp = 100;
-    
-    // وظيفة توليد الصوت برمجياً (بتشتغل أوفلاين)
+
     function playHitSound() {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1);
-        } catch(e) { console.log("الصوت محظور حالياً"); }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        } catch(e) {}
     }
 
     function hit(damage, emoji) {
         if (hp <= 0) return;
 
         playHitSound();
-
-        hp -= damage;
+        hp -= damage; // هيك الضحية بتحتاج تقريباً 15 ضربة لتخلص
         if (hp < 0) hp = 0;
 
-        const bar = document.getElementById('healthBar');
-        bar.style.width = hp + '%';
-        bar.innerText = 'طاقة الضحية: ' + hp + '%';
-
-        const area = document.getElementById('victimArea');
-        const effect = document.createElement('div');
-        effect.className = 'hit-effect';
-        effect.innerText = emoji;
-        effect.style.left = (Math.random() * 120 + 40) + 'px';
-        effect.style.top = (Math.random() * 120 + 40) + 'px';
-        area.appendChild(effect);
-        setTimeout(() => effect.remove(), 400);
-
-        document.getElementById('mainBody').classList.add('shake');
-        document.getElementById('victimImg').style.transform = 'scale(0.9) rotate(5deg)';
-        setTimeout(() => {
-            document.getElementById('mainBody').classList.remove('shake');
-            document.getElementById('victimImg').style.transform = 'scale(1) rotate(0deg)';
-        }, 200);
-
-        if (hp <= 0) {
-            Swal.fire({
-                title: 'كفو يا بطله اضربيه تاني وفشي غلك',
-                text: 'هيك أعصابك صارت تمام؟ 😉',
-                icon: 'success',
-                confirmButtonText: 'إعادة الضرب 🔥',
-                confirmButtonColor: '#ff758c'
-            }).then(() => { location.reload(); });
-        }
-    }
-</script>
-
-</body>
-</html>
+        const bar = document.getElementById('health
