@@ -51,14 +51,13 @@
             border-radius: 50%;
             border: 4px solid #ff758c;
             overflow: hidden;
-            background: #fff;
+            background: #222;
         }
 
-        #victimImg {
+        /* استبدلنا الـ img بـ canvas */
+        #victimCanvas {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transition: 0.3s filter, 0.1s transform;
         }
 
         .health-container {
@@ -98,11 +97,10 @@
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
-            background: #ff758c; /* لون موحد للكل */
+            background: #ff758c;
             color: #fff;
             transition: 0.2s;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .btn-hit:active { transform: scale(0.9); }
@@ -133,96 +131,158 @@
     </div>
 
     <div class="victim-container" id="victimArea">
-        <img id="victimImg" src="victim.png" onerror="this.src='https://i.ibb.co/3sS7L7W/target-v2.png'">
+        <canvas id="victimCanvas"></canvas>
     </div>
 
     <div class="controls">
-        <button class="btn-hit" onclick="hit(6, '🥊')">بوكس 🥊</button>
-        <button class="btn-hit" onclick="hit(7, '🖐️')">كف 👋</button>
-        <button class="btn-hit" onclick="hit(8, '🦵')">ركلة 🦵</button>
-        <button class="btn-hit" onclick="hit(5, '👞')">جزمه 👞</button>
-        <button class="btn-hit" onclick="hit(10, '🔪')">سكين 🔪</button>
-        <button class="btn-hit" onclick="hit(9, '🦯')">عصا 🦯</button>
-        <button class="btn-hit" onclick="hit(4, '💦')">تفه 💦</button>
-        <button class="btn-hit" onclick="hit(12, '🗑️')">زبالة 🗑️</button>
+        <button class="btn-hit" onclick="hit(10, '🥊')">بوكس 🥊</button>
+        <button class="btn-hit" onclick="hit(12, '🖐️')">كف 👋</button>
+        <button class="btn-hit" onclick="hit(15, '🦵')">ركلة 🦵</button>
+        <button class="btn-hit" onclick="hit(10, '👞')">جزمه 👞</button>
+        <button class="btn-hit" onclick="hit(20, '🔪')">سكين 🔪</button>
+        <button class="btn-hit" onclick="hit(15, '🦯')">عصا 🦯</button>
+        <button class="btn-hit" onclick="hit(8, '💦')">تفه 💦</button>
+        <button class="btn-hit" onclick="hit(25, '🗑️')">زبالة 🗑️</button>
     </div>
 
-    <div class="footer">AL-MOSIBA GAMES © 2026</div>
+    <div style="margin-top:15px; font-size: 0.8rem; opacity: 0.6;">AL-MOSIBA GAMES © 2026</div>
 </div>
 
 <script>
     let hp = 100;
+    const canvas = document.getElementById('victimCanvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = 'victim.png'; // تأكد من وجود الصورة بنفس المجلد
 
-    // وظيفة الصوت - تم تصحيحها لتعمل مع كل ضغطة
+    let shards = [];
+    let isBroken = false;
+    const pieceSize = 20;
+
+    img.onload = function() {
+        canvas.width = 200;
+        canvas.height = 200;
+        drawNormal();
+    };
+
+    // إذا فشل تحميل الصورة، نستخدم شكل بديل
+    img.onerror = function() {
+        canvas.width = 200;
+        canvas.height = 200;
+        ctx.fillStyle = "#ff758c";
+        ctx.fillRect(0,0,200,200);
+    };
+
+    function drawNormal() {
+        if (isBroken) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // تطبيق الفلتر حسب الصحة
+        let damageDone = 100 - hp;
+        ctx.filter = `grayscale(${damageDone}%) blur(${damageDone / 20}px)`;
+        ctx.drawImage(img, 0, 0, 200, 200);
+        ctx.filter = 'none';
+    }
+
     function playHitSound() {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
             osc.type = 'square';
             osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
-        } catch(e) { console.log("Audio Error"); }
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } catch(e) {}
+    }
+
+    function createShards() {
+        isBroken = true;
+        for (let y = 0; y < canvas.height; y += pieceSize) {
+            for (let x = 0; x < canvas.width; x += pieceSize) {
+                shards.push({
+                    x: x, y: y,
+                    sx: x, sy: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 1) * 10,
+                    gravity: 0.5,
+                    rotation: 0,
+                    rSpeed: (Math.random() - 0.5) * 0.2
+                });
+            }
+        }
+        animateShards();
+    }
+
+    function animateShards() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        shards.forEach(s => {
+            s.vy += s.gravity;
+            s.x += s.vx;
+            s.y += s.vy;
+            s.rotation += s.rSpeed;
+
+            if (s.y < canvas.height + 50) {
+                active = true;
+                ctx.save();
+                ctx.translate(s.x + pieceSize/2, s.y + pieceSize/2);
+                ctx.rotate(s.rotation);
+                ctx.drawImage(img, s.sx, s.sy, pieceSize, pieceSize, -pieceSize/2, -pieceSize/2, pieceSize, pieceSize);
+                ctx.restore();
+            }
+        });
+
+        if (active) {
+            requestAnimationFrame(animateShards);
+        } else {
+            showWinAlert();
+        }
     }
 
     function hit(damage, emoji) {
         if (hp <= 0) return;
-
-        // تشغيل الصوت
         playHitSound();
-
-        // نقص الصحة
-        hp = hp - damage; 
+        hp -= damage;
         if (hp < 0) hp = 0;
 
         const bar = document.getElementById('healthBar');
-        const img = document.getElementById('victimImg');
-        const area = document.getElementById('victimArea');
-
-        // تحديث شريط الصحة
         bar.style.width = hp + '%';
         bar.innerText = 'طاقة الضحية: ' + Math.ceil(hp) + '%';
 
-        // تشويه الصورة
-        let damageDone = 100 - hp;
-        img.style.filter = `grayscale(${damageDone}%) blur(${damageDone / 10}px) brightness(${100 - damageDone / 2}%)`;
-        
-        // حركة بسيطة للصورة
-        img.style.transform = `scale(0.9) rotate(${Math.random() * 10 - 5}deg)`;
-        setTimeout(() => img.style.transform = 'scale(1) rotate(0deg)', 100);
+        // هز الشاشة عند الضرب
+        canvas.style.transform = `translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
+        setTimeout(() => canvas.style.transform = 'translate(0,0)', 50);
 
-        // تأثير الإيموجي الطاير
+        drawNormal();
+
+        // إيموجي طاير
         const effect = document.createElement('div');
         effect.className = 'hit-effect';
         effect.innerText = emoji;
-        effect.style.left = (Math.random() * 100 + 50) + 'px';
-        effect.style.top = (Math.random() * 100 + 20) + 'px';
-        area.appendChild(effect);
+        effect.style.left = '50%';
+        effect.style.top = '50%';
+        document.getElementById('victimArea').appendChild(effect);
         setTimeout(() => effect.remove(), 500);
 
-        // النهاية
         if (hp <= 0) {
-            Swal.fire({
-                title: 'كفو يا بطله اضربيه تاني وفشي غلك',
-                text: 'أعصابك هديت؟ الضحية انمسحت ملامحه! 😂',
-                icon: 'success',
-                confirmButtonText: 'إعادة الجولة 🔥',
-                confirmButtonColor: '#ff758c'
-            }).then(() => {
-                hp = 100;
-                location.reload();
-            });
+            createShards();
         }
+    }
+
+    function showWinAlert() {
+        Swal.fire({
+            title: 'كفو يا بطله!',
+            text: 'الضحية تكسر واندعس عليه! 😂 أعصابك هديت؟',
+            icon: 'success',
+            confirmButtonText: 'إعادة الجولة 🔥',
+            confirmButtonColor: '#ff758c'
+        }).then(() => {
+            location.reload();
+        });
     }
 </script>
 
