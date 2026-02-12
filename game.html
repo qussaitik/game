@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اضربيه وهدي أعصابك يا حلوة ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb);
+            background-size: 400% 400%;
+            animation: gradient 12s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 40px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+
+        h1 { 
+            font-size: 1.8rem; 
+            margin: 0 0 10px 0; 
+            color: #fff; 
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 1); 
+        }
+
+        p {
+            font-size: 1rem;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 1);
+            margin-bottom: 20px;
+            color: #ffd1d1;
+        }
+
+        .victim-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 20px auto;
+            border-radius: 50%;
+            border: 5px solid #ff758c;
+            overflow: hidden;
+            cursor: crosshair;
+            background: #fff;
+        }
+
+        #victimImg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.1s;
+        }
+
+        .hit-effect {
+            position: absolute;
+            font-size: 60px;
+            pointer-events: none;
+            z-index: 100;
+            animation: hitAnim 0.4s ease-out forwards;
+        }
+
+        @keyframes hitAnim {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2) translateY(-50px); opacity: 0; }
+        }
+
+        .health-container {
+            width: 100%;
+            height: 25px;
+            background: #333;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #555;
+            overflow: hidden;
+        }
+
+        #healthBar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff4e50, #f9d423);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-hit {
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: #ff758c;
+            color: #fff;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn-hit:active { transform: scale(0.9); }
+
+        .footer { margin-top: 25px; font-size: 0.8rem; color: #ccc; }
+
+        .shake { animation: shake 0.2s; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(-1deg); }
+            40% { transform: translate(3px, 2px) rotate(1deg); }
+            60% { transform: translate(-1px, -1px) rotate(0deg); }
+            80% { transform: translate(-3px, 1px) rotate(-1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body id="mainBody">
+
+<div class="game-card">
+    <h1>اضربيه وهدي أعصابك يا حلوة ✨</h1>
+    <p>طلعي كل الزعل وفشي غلك فيه! 😈</p>
+
+    <div class="health-container">
+        <div id="healthBar">طاقة الضحية: 100%</div>
+    </div>
+
+    <div class="victim-container" id="victimArea">
+        <img id="victimImg" src="victim.png" onerror="this.src='https://i.ibb.co/3sS7L7W/target-v2.png'">
+    </div>
+
+    <div class="controls">
+        <button class="btn-hit" onclick="hit(10, '🥊')">بوكس 🥊</button>
+        <button class="btn-hit" onclick="hit(15, '🖐️')">كف 👋</button>
+        <button class="btn-hit" onclick="hit(20, '🦵')">ركلة 🦵</button>
+        <button class="btn-hit" onclick="hit(25, '👞')">جزمه 👞</button>
+    </div>
+
+    <div class="footer">صُنع بكل حب لمحاربة النكد © 2026</div>
+</div>
+
+<script>
+    let hp = 100;
+    // أصوات جاهزة من روابط مباشرة (أصوات ضربات حقيقية)
+    const punchSound = new Audio('https://www.soundjay.com/human/sounds/punch-guy-fist-1.mp3');
+    const slapSound = new Audio('https://www.soundjay.com/human/sounds/slap-1.mp3');
+
+    function hit(damage, emoji) {
+        if (hp <= 0) return;
+
+        // تشغيل صوت عشوائي
+        if (emoji === '🖐️') slapSound.play();
+        else { punchSound.currentTime = 0; punchSound.play(); }
+
+        hp -= damage;
+        if (hp < 0) hp = 0;
+
+        const bar = document.getElementById('healthBar');
+        bar.style.width = hp + '%';
+        bar.innerText = 'طاقة الضحية: ' + hp + '%';
+
+        // تأثير الضربة
+        const area = document.getElementById('victimArea');
+        const effect = document.createElement('div');
+        effect.className = 'hit-effect';
+        effect.innerText = emoji;
+        effect.style.left = (Math.random() * 120 + 40) + 'px';
+        effect.style.top = (Math.random() * 120 + 40) + 'px';
+        area.appendChild(effect);
+        setTimeout(() => effect.remove(), 400);
+
+        // اهتزاز
+        document.getElementById('mainBody').classList.add('shake');
+        document.getElementById('victimImg').style.transform = 'scale(0.9) rotate(5deg)';
+        setTimeout(() => {
+            document.getElementById('mainBody').classList.remove('shake');
+            document.getElementById('victimImg').style.transform = 'scale(1) rotate(0deg)';
+        }, 200);
+
+        if (hp <= 0) {
+            Swal.fire({
+                title: 'كفو يا بطله اضربيه تاني وفشي غلك',
+                text: 'هيك أعصابك صارت تمام؟ 😉',
+                icon: 'success',
+                confirmButtonText: 'إعادة الضرب 🔥',
+                confirmButtonColor: '#ff758c'
+            }).then(() => { location.reload(); });
+        }
+    }
+</script>
+
+</body>
+</html>
